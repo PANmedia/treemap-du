@@ -2,28 +2,38 @@
     require_once __DIR__ . '/../include.php';
     $depth = isset($_GET['depth']) ? $_GET['depth'] : 0;
     $data = [];
+    $unique = [];
     foreach (getAllLogs() as $log) {
         $row = [];
-        eachLine($log, 0, function($size, $path) use(&$row, $depth) {
+        eachLine($log, 0, function($size, $path) use(&$row, &$unique, $depth) {
             if (substr_count($path, '/') == $depth) {
                 // substr($path, 0, strpos_offset('/', $path, $depth))
                 $row[$path] = $size;
+                $unique[$path] = $path;
             }
         });
         $data[getTimeStamp($log)] = $row;
     }
+    foreach ($data as &$rows) {
+        foreach ($unique as $u) {
+            if (!isset($rows[$u])) {
+                $rows[$u] = 0;
+            }
+        }
+        ksort($rows);
+    }
     $categories = [];
     $series = [];
-    foreach ($data as $time => $rows) {
+    foreach ($data as $time => $rows2) {
         $categories[] = date('Y-m-d H:i:s', $time);
-        foreach ($rows as $path => $row) {
+        foreach ($rows2 as $path => $row2) {
             if (!isset($series[$path])) {
                 $series[$path] = [
                     'name' => $path,
                     'data' => [],
                 ];
             }
-            $series[$path]['data'][] = $row;
+            $series[$path]['data'][] = $row2;
         }
     }
     $series = array_values($series);
@@ -36,7 +46,7 @@
     <input type="number" name="depth" value="<?= $depth; ?>" />
     <button type="submit">Submit</button>
 </form>
-<div id="container" style="min-width: 400px; height: 400px; margin: 0 auto"></div>
+<div id="container" style="min-width: 400px; height: 900px; margin: 0 auto"></div>
 <script>
     function humanFileSize(bytes, si) {
         var thresh = si ? 1000 : 1024;

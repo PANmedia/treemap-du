@@ -5,7 +5,9 @@ function getLogPath() {
 }
 
 function getAllLogs() {
-    return glob(getLogPath() . '/*.txt');
+    $logs = glob(getLogPath() . '/*.txt');
+    sort($logs);
+    return $logs;
 }
 
 function getLatestLog() {
