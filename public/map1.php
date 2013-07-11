@@ -100,7 +100,7 @@ d3.json("du.php?limit=<?= $limit; ?>", function(data) {
         do {
           path.unshift(parent.name);
         } while (parent = parent.parent);
-        document.getElementById('path').innerText = humanFileSize(d.size * 1000) + ' ' + path.join('/');
+        document.getElementById('path').innerText = humanFileSize(d.size) + ' ' + path.join('/');
       })
       .on("click", function(d) { return zoom(node == d.parent ? root : d.parent); });
 
