@@ -149,5 +149,6 @@ function zoom(d) {
 }
 
     </script>
+    <pre><?= exec('df -h'); ?></pre>
   </body>
 </html>
