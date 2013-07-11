@@ -149,6 +149,6 @@ function zoom(d) {
 }
 
     </script>
-    <pre><?= exec('df -h'); ?></pre>
+    <pre><?= file_get_contents('df.txt'); ?></pre>
   </body>
 </html>
