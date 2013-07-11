@@ -2,7 +2,7 @@
 //die(file_get_contents(__DIR__ . '/flare.json'));
 $du = file_get_contents(__DIR__ . '/du.txt');
 $tree = [
-    'name' => 'root',
+    'name' => '.',
     'size' => null,
     'children' => [],
 ];
