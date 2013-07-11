@@ -8,6 +8,12 @@ function getAllLogs() {
     return glob(getLogPath() . '/*.txt');
 }
 
+function getLatestLog() {
+    $logs = getAllLogs();
+    rsort($logs);
+    return $logs[0];
+}
+
 function eachLine($file, $limit, $callback) {
     $du = file_get_contents($file);
     foreach (explode("\n", $du) as $line) {

@@ -1,38 +1,27 @@
 <?php
-//die(file_get_contents(__DIR__ . '/flare.json'));
-$du = file_get_contents(__DIR__ . '/du.txt');
+require_once __DIR__ . '/../include.php';
+$limit = isset($_GET['limit']) ? $_GET['limit'] : 100;
 $tree = [
     'name' => '.',
     'size' => null,
     'children' => [],
 ];
-foreach (explode("\n", $du) as $line) {
-    if (!$line) {
-        continue;
+$file = getLatestLog();
+
+eachLine($file, $limit, function($size, $path) use(&$tree) {
+    $paths = explode('/', $path);
+    $root =& $tree['children'];
+    foreach ($paths as $node) {
+        if (!isset($root[$node])) {
+            $root[$node] = [
+                'name' => $node,
+                'size' => $size,
+                'children' => [],
+            ];
+        }
+        $root =& $root[$node]['children'];
     }
-    if (preg_match('/([0-9]+)\s+(.*)/', trim($line), $matches)) {
-        $size = $matches[1];
-        if ($size < 100) {
-            continue;
-        }
-        $path = trim($matches[2], '/.');
-        if (!$path) {
-            continue;
-        }
-        $paths = explode('/', $path);
-        $root =& $tree['children'];
-        foreach ($paths as $node) {
-            if (!isset($root[$node])) {
-                $root[$node] = [
-                    'name' => $node,
-                    'size' => $size,
-                    'children' => [],
-                ];
-            }
-            $root =& $root[$node]['children'];
-        }
-    }
-}
+});
 
 function trimTree(&$tree) {
     if (sizeof($tree['children']) == 0) {

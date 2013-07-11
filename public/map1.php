@@ -1,4 +1,6 @@
-
+<?php
+    $limit = isset($_GET['limit']) ? $_GET['limit'] : 100;
+?>
 <!DOCTYPE html>
 <html>
   <head>
@@ -21,14 +23,19 @@ rect {
   fill: none;
 }
 
-#path {
+.center {
   text-align: center;
 }
     </style>
   </head>
   <body>
     <div id="body">
-      <div id="path"></div>
+        <form class="center" action="" method="get">
+            <label>Limit: </label>
+            <input type="number" name="limit" value="<?= $limit; ?>" />
+            <button type="submit">Submit</button>
+            <div id="path"></div>
+        </form>
       <div id="footer">
         d3.layout.treemap
         <div class="hint">click or option-click to descend or ascend</div>
@@ -76,7 +83,7 @@ var svg = d3.select("#body").append("div")
   .append("svg:g")
     .attr("transform", "translate(.5,.5)");
 
-d3.json("du.php", function(data) {
+d3.json("du.php?limit=<?= $limit; ?>", function(data) {
   node = root = data;
 
   var nodes = treemap.nodes(root)
