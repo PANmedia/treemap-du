@@ -33,26 +33,44 @@
     foreach ($data[$end] as $final) {
         $total += $final;
     }
+
+    // Make rows consistant
+    $percent = [];
+    foreach ($data as $key => &$rows) {
+        foreach ($unique as $u) {
+            if (!isset($rows[$u])) {
+                $rows[$u] = 0;
+            }
+        }
+    }
+
+    // Cull small dirs
     $cullKeys = [];
     foreach ($data[$end] as $i => $final) {
         if ($final / $total * 100 < $cull) {
             $cullKeys[$i] = $i;
         }
     }
-
-    $percent = [];
     foreach ($data as $key => &$rows) {
         foreach ($unique as $u) {
             if (isset($cullKeys[$u])) {
                 unset($rows[$u]);
-                continue;
-            }
-            if (!isset($rows[$u])) {
-                $rows[$u] = 0;
             }
         }
-        ksort($rows);
     }
+
+    // Sort by size
+    $sorted = [];
+    arsort($data[$end]);
+    $order = array_keys($data[$end]);
+    var_dump($order);
+    foreach ($data as $i => $rows) {
+        $sorted[$i] = [];
+        foreach ($order as $j) {
+            $sorted[$i][$j] = $rows[$j];
+        }
+    }
+    $data = $sorted;
 
     $categories = [];
     $series = [];
@@ -150,13 +168,13 @@
             },
             tooltip: {
                 shared: true,
-                formatter: function() {
-                    var result = [];
-                    for (var i = 0; i < this.points.length; i++) {
-                        result.push(this.points[i].series.name + ' ' + humanFileSize(this.points[i].y));
-                    }
-                    return result.join('<br/>');
-                }
+//                formatter: function() {
+//                    var result = [];
+//                    for (var i = 0; i < this.points.length; i++) {
+//                        result.push(this.points[i].series.name + ' ' + humanFileSize(this.points[i].y));
+//                    }
+//                    return '{series.color}' + result.join('<br/>');
+//                }
             },
             plotOptions: {
                 series: {
