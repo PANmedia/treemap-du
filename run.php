@@ -18,7 +18,7 @@ $file = $path . '/du_' . date('Y-m-d_H-i-s') . '.txt';
 file_put_contents($file, $output);
 echo 'Wrote ' . $file . PHP_EOL . PHP_EOL;
 
-$cmd = 'df';
+$cmd = 'df -h';
 echo 'Running ' . $cmd . PHP_EOL;
 exec($cmd, $output);
 $path = __DIR__ . '/public';
