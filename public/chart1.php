@@ -101,6 +101,7 @@
                 }
             }
         ?>
+        <pre><?= `df -h`; ?></pre>
     </form>
 </div>
 <div id="container"></div>
