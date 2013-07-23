@@ -1,27 +1,59 @@
 <?php
     require_once __DIR__ . '/../include.php';
     $depth = isset($_GET['depth']) ? $_GET['depth'] : 0;
+    $cull = isset($_GET['cull']) ? $_GET['cull'] : 1;
+    $startPath = isset($_GET['path']) ? $_GET['path'] : '/';
+    $startPath = '/' . trim($startPath, '/');
+    if ($startPath == '/') {
+        $startDepth = 1;
+    } else {
+        $startDepth = substr_count($startPath, '/') + 1;
+    }
+
     $data = [];
     $unique = [];
     foreach (getAllLogs() as $log) {
         $row = [];
-        eachLine($log, 0, function($size, $path) use(&$row, &$unique, $depth) {
-            if (substr_count($path, '/') == $depth) {
-                // substr($path, 0, strpos_offset('/', $path, $depth))
+        eachLine($log, 0, function($size, $path, $root, $depth) use(&$row, &$unique, $startPath, $startDepth) {
+            if (strpos($path, $startPath) === 0 && $depth == $startDepth) {
+                if (!isset($row[$path])) {
+                    $row[$path] = 0;
+                }
                 $row[$path] = $size;
                 $unique[$path] = $path;
             }
         });
-        $data[getTimeStamp($log)] = $row;
+        if (!empty($row)) {
+            $data[getTimeStamp($log)] = $row;
+        }
     }
-    foreach ($data as &$rows) {
+    $end = end($data);
+    $end = key($data);
+    $total = 0;
+    foreach ($data[$end] as $final) {
+        $total += $final;
+    }
+    $cullKeys = [];
+    foreach ($data[$end] as $i => $final) {
+        if ($final / $total * 100 < $cull) {
+            $cullKeys[$i] = $i;
+        }
+    }
+
+    $percent = [];
+    foreach ($data as $key => &$rows) {
         foreach ($unique as $u) {
+            if (isset($cullKeys[$u])) {
+                unset($rows[$u]);
+                continue;
+            }
             if (!isset($rows[$u])) {
                 $rows[$u] = 0;
             }
         }
         ksort($rows);
     }
+
     $categories = [];
     $series = [];
     foreach ($data as $time => $rows2) {
@@ -41,12 +73,37 @@
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
 <script src="http://code.highcharts.com/highcharts.js"></script>
 <script src="http://code.highcharts.com/modules/exporting.js"></script>
-<form action="" method="get">
-    <label>Depth: </label>
-    <input type="number" name="depth" value="<?= $depth; ?>" />
-    <button type="submit">Submit</button>
-</form>
-<div id="container" style="min-width: 400px; height: 900px; margin: 0 auto"></div>
+<style type="text/css">
+    #sidebar {
+        width: 20%;
+        height: 100%;
+        float: left;
+    }
+    #container {
+        width: 80%;
+        height: 100%;
+        float: left;
+        margin: 0 auto;
+    }
+</style>
+<div id="sidebar">
+    <form action="" method="get">
+        <label>Cull: </label>
+        <input type="number" name="cull" value="<?= $cull; ?>" /> %<br/>
+        <label>Path: </label>
+        <input type="text" name="path" value="<?= $startPath; ?>" /><br/>
+        <button type="submit">Submit</button>
+        <?php
+            foreach ($unique as $u) {
+                if (!isset($cullKeys[$u])) {
+                    $u2 = basename($u);
+                    echo "<br/><a href='?path=$u'>$u2</a>";
+                }
+            }
+        ?>
+    </form>
+</div>
+<div id="container"></div>
 <script>
     function humanFileSize(bytes, si) {
         var thresh = si ? 1000 : 1024;

@@ -31,7 +31,12 @@ function eachLine($file, $limit, $callback) {
             if (!$path) {
                 continue;
             }
-            $callback((int) $size * 1000, $path);
+            if (strpos($path, '/') !== false) {
+                $root = substr($path, 0, strpos($path, '/'));
+            } else {
+                $root = $path;
+            }
+            $callback((int) $size * 1000, '/' . $path, '/' . $root, substr_count($path, '/') + 1);
         }
     }
 }
