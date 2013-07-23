@@ -63,7 +63,6 @@
     $sorted = [];
     arsort($data[$end]);
     $order = array_keys($data[$end]);
-    var_dump($order);
     foreach ($data as $i => $rows) {
         $sorted[$i] = [];
         foreach ($order as $j) {
