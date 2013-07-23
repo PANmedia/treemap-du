@@ -85,6 +85,9 @@
         float: left;
         margin: 0 auto;
     }
+    pre {
+        overflow: auto;
+    }
 </style>
 <div id="sidebar">
     <form action="" method="get">
