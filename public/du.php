@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/../include.php';
-$limit = isset($_GET['limit']) ? $_GET['limit'] : 100;
+$limit = isset($_GET['limit']) ? (int) $_GET['limit'] : 100;
 $tree = [
     'name' => '.',
     'size' => null,

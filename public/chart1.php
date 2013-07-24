@@ -1,8 +1,10 @@
 <?php
     require_once __DIR__ . '/../include.php';
-    $depth = isset($_GET['depth']) ? $_GET['depth'] : 0;
-    $cull = isset($_GET['cull']) ? $_GET['cull'] : 1;
+    $cull = isset($_GET['cull']) ? (int) $_GET['cull'] : 1;
     $startPath = isset($_GET['path']) ? $_GET['path'] : '/';
+    if (!preg_match('@^[a-z0-9-_ ./\\\]+$@i', $startPath)) {
+        die('Invalid path');
+    }
     $startPath = '/' . trim($startPath, '/');
     if ($startPath == '/') {
         $startDepth = 1;
@@ -26,6 +28,9 @@
         if (!empty($row)) {
             $data[getTimeStamp($log)] = $row;
         }
+    }
+    if (empty($data)) {
+        die('No data');
     }
     $end = end($data);
     $end = key($data);

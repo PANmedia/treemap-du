@@ -1,5 +1,5 @@
 <?php
-    $limit = isset($_GET['limit']) ? $_GET['limit'] : 100;
+    $limit = isset($_GET['limit']) ? (int) $_GET['limit'] : 100;
 ?>
 <!DOCTYPE html>
 <html>
@@ -94,7 +94,7 @@ d3.json("du.php?limit=<?= $limit; ?>", function(data) {
     .enter().append("svg:g")
       .attr("class", "cell")
       .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
-      .on("mouseover", function(d) { 
+      .on("mouseover", function(d) {
         var parent = d,
             path = [];
         do {
