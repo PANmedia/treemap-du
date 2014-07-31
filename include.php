@@ -10,6 +10,16 @@ function getAllLogs() {
     return $logs;
 }
 
+function get3Logs() {
+    $logs = getAllLogs();
+    sort($logs);
+    $result = [];
+    $result[] = reset($logs);
+    $result[] = $logs[floor(count($logs) / 2)];
+    $result[] = end($logs);
+    return $result;
+}
+
 function getLatestLog() {
     $logs = getAllLogs();
     rsort($logs);
@@ -22,30 +32,29 @@ function eachLine($file, $limit, $callback) {
         if (!$line) {
             continue;
         }
-        if (preg_match('/([0-9]+)\s+(.*)/', trim($line), $matches)) {
-            $size = $matches[1];
-            if ($size < $limit) {
-                continue;
-            }
-            $path = trim($matches[2], '/.');
-            if (!$path) {
-                continue;
-            }
-            if (strpos($path, '/') !== false) {
-                $root = substr($path, 0, strpos($path, '/'));
-            } else {
-                $root = $path;
-            }
-            $callback((int) $size * 1000, '/' . $path, '/' . $root, substr_count($path, '/') + 1);
+        $matches = explode("\t", $line);
+        if ($matches[0] < $limit) {
+            continue;
         }
+        $matches[1] = trim($matches[1], '/.');
+        if (!$matches[1]) {
+            continue;
+        }
+        if (strpos($matches[1], '/') !== false) {
+            $root = substr($matches[1], 0, strpos($matches[1], '/'));
+        } else {
+            $root = $matches[1];
+        }
+        $callback((int) $matches[0] * 1000, '/' . $matches[1], '/' . $root, substr_count($matches[1], '/') + 1);
     }
 }
 
 function getTimeStamp($file) {
     $timestamp = basename($file);
-    $timestamp = str_replace('du_', '', $timestamp);
-    $timestamp = str_replace('.txt', '', $timestamp);
-    return DateTime::createFromFormat('Y-m-d_H-i-s', $timestamp)->format('U');
+    if (preg_match('/du_.*?([0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{2}-[0-9]{2}-[0-9]{2})/', $timestamp, $matches)) {
+        return DateTime::createFromFormat('Y-m-d_H-i-s', $matches[1])->format('U');
+    }
+    return null;
 }
 
 /**

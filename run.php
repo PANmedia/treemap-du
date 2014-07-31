@@ -10,7 +10,7 @@ $cwd = '.';
 if (isset($_SERVER['argv'][1])) {
     $cwd = $_SERVER['argv'][1];
 }
-$cmd = 'du ' . $cwd;
+$cmd = 'du --exclude=*/proc* ' . $cwd;
 echo 'Running ' . $cmd . PHP_EOL;
 exec($cmd, $output);
 $output = implode(PHP_EOL, $output);
