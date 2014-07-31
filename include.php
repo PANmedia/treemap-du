@@ -26,26 +26,11 @@ function getLatestLog() {
     return $logs[0];
 }
 
-function eachLine($file, $limit, $callback) {
+function eachLine($file, $limit) {
     $du = file_get_contents($file);
-    foreach (explode("\n", $du) as $line) {
-        if (!$line) {
-            continue;
-        }
-        $matches = explode("\t", $line);
-        if ($matches[0] < $limit) {
-            continue;
-        }
-        $matches[1] = trim($matches[1], '/.');
-        if (!$matches[1]) {
-            continue;
-        }
-        if (strpos($matches[1], '/') !== false) {
-            $root = substr($matches[1], 0, strpos($matches[1], '/'));
-        } else {
-            $root = $matches[1];
-        }
-        $callback((int) $matches[0] * 1000, '/' . $matches[1], '/' . $root, substr_count($matches[1], '/') + 1);
+    $fp = fopen($file, 'r');
+    while ($line = fgetcsv($fp, 1024, "\t")) {
+        yield $line;
     }
 }
 

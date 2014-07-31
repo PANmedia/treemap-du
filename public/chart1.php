@@ -55,29 +55,24 @@
                         'data' => [],
                     ];
                 }
-                $series[$path]['data'][] = $row2;
+                $series[$path]['data'][] = (int) $row2;
             }
         }
         $series = array_values($series);
     }
 
-    function getData($cull, $startPath) {
+    function getData($cull, $startPath, $logs) {
         if (!preg_match('@^[a-z0-9-_ ./\\\]+$@i', $startPath)) {
             die('Invalid path');
         }
         $startPath = '/' . trim($startPath, '/');
-        if ($startPath == '/') {
-            $startDepth = 1;
-        } else {
-            $startDepth = substr_count($startPath, '/') + 1;
-        }
+        $startDepth = substr_count($startPath, '/') + 1;
 
-        $logs = get3Logs();
         $key = [$cull, $startPath];
         foreach ($logs as $log) {
-            $key[] = sha1_file($log);
+            $key[] = filemtime($log);
         }
-        $cacheFile = __DIR__ . '/../cache/' . sha1(implode(':', $key)) . '.json';
+        $cacheFile = __DIR__ . '/../cache/' . md5(implode(':', $key)) . '.json';
         if (is_file($cacheFile)) {
             return json_decode(file_get_contents($cacheFile), true);
         }
@@ -86,15 +81,14 @@
         $unique = [];
         foreach ($logs as $log) {
             $row = [];
-            eachLine($log, 0, function($size, $path, $root, $depth) use(&$row, &$unique, $startPath, $startDepth) {
-                if (strpos($path, $startPath) === 0 && $depth == $startDepth) {
-                    if (!isset($row[$path])) {
-                        $row[$path] = 0;
-                    }
-                    $row[$path] = $size;
-                    $unique[$path] = $path;
+            $fp = fopen($log, 'r');
+            while ($line = fgetcsv($fp, 1024, "\t")) {
+                if (strpos($line[1], $startPath) === 0 && substr_count($line[1], '/') == $startDepth) {
+                    $row[$line[1]] = $line[0];
+                    $unique[$line[1]] = $line[1];
                 }
-            });
+            }
+            fclose($fp);
             if (!empty($row)) {
                 $data[getTimeStamp($log)] = $row;
             }
@@ -125,11 +119,12 @@
             'unique' => $unique,
             'cullKeys' => $cullKeys,
         ];
+
         //file_put_contents($cacheFile, json_encode($result, JSON_PRETTY_PRINT));
         return $result;
     }
-
-    $data = getData($cull, $startPath);
+    $logs = isset($_GET['all']) ? getAllLogs() : get3Logs();
+    $data = getData($cull, $startPath, $logs);
 ?>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
 <script src="http://code.highcharts.com/highcharts.js"></script>
@@ -156,16 +151,17 @@
         <input type="number" name="cull" value="<?= $cull; ?>" /> %<br/>
         <label>Path: </label>
         <input type="text" name="path" value="<?= $startPath; ?>" /><br/>
+        <input type="checkbox" name="all" value="true" />
+        <label> Include all logs</label><br/>
         <button type="submit">Submit</button>
         <?php
             foreach ($data['unique'] as $u) {
-                if (!isset($data['$cullKeys'][$u])) {
+                if (!isset($data['cullKeys'][$u])) {
                     $u2 = basename($u);
                     echo "<br/><a href='?path=$u'>$u2</a>";
                 }
             }
         ?>
-        <pre><?= `df -h`; ?></pre>
     </form>
 </div>
 <?php if (!empty($data['series'])): ?>
@@ -200,25 +196,8 @@
                         enabled: false
                     }
                 },
-                yAxis: {
-                    title: {
-                        text: 'MB'
-                    },
-                    labels: {
-                        formatter: function() {
-                            return this.value / 1000 / 1000;
-                        }
-                    }
-                },
                 tooltip: {
-                    shared: true,
-    //                formatter: function() {
-    //                    var result = [];
-    //                    for (var i = 0; i < this.points.length; i++) {
-    //                        result.push(this.points[i].series.name + ' ' + humanFileSize(this.points[i].y));
-    //                    }
-    //                    return '{series.color}' + result.join('<br/>');
-    //                }
+                    shared: true
                 },
                 plotOptions: {
                     series: {
