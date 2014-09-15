@@ -1,5 +1,5 @@
 <?php
-    require_once __DIR__ . '/../include.php';
+    require_once __DIR__ . '/../../include.php';
     set_time_limit(100);
 
     $cull = isset($_GET['cull']) ? (int) $_GET['cull'] : 1;
@@ -127,8 +127,8 @@
     $data = getData($cull, $startPath, $logs);
 ?>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
-<script src="http://code.highcharts.com/highcharts.js"></script>
-<script src="http://code.highcharts.com/modules/exporting.js"></script>
+<script src="//code.highcharts.com/highcharts.js"></script>
+<script src="//code.highcharts.com/modules/exporting.js"></script>
 <style type="text/css">
     #sidebar {
         width: 20%;

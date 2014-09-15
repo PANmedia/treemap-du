@@ -1,13 +1,13 @@
 <?php
-    $limit = isset($_GET['limit']) ? (int) $_GET['limit'] : 5;
+    $limit = isset($_GET['limit']) ? (int) $_GET['limit'] : 4;
 ?>
 <!DOCTYPE html>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
         <link type="text/css" rel="stylesheet" href="style.css"/>
-        <script type="text/javascript" src="libraries/d3.js"></script>
-        <script type="text/javascript" src="libraries/d3.layout.js"></script>
+        <script type="text/javascript" src="//code.jquery.com/jquery-2.1.1.min.js"></script>
+        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/d3/3.4.11/d3.js"></script>
         <style type="text/css">
             .chart {
                 display: block;
@@ -60,7 +60,7 @@
             return bytes.toFixed(1)+' '+units[u];
         };
 
-        var w = 1280 - 80,
+        var w = $(window).width() - 100,
             h = 800 - 180,
             x = d3.scale.linear().range([0, w]),
             y = d3.scale.linear().range([0, h]),
@@ -96,12 +96,7 @@
                     .attr("class", "cell")
                     .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
                     .on("mouseover", function(d) {
-                        var parent = d,
-                            path = [];
-                        do {
-                            path.unshift(parent.name);
-                        } while (parent = parent.parent);
-                        document.getElementById('path').innerText = humanFileSize(d.size) + ' ' + path.join('/');
+                        document.getElementById('path').innerText = humanFileSize(d.size) + ' ' + d.name;
                     })
                     .on("click", function(d) { return zoom(node == d.parent ? root : d.parent); });
 
@@ -156,6 +151,5 @@
             d3.event.stopPropagation();
         }
     </script>
-    <pre><?= file_get_contents('df.txt'); ?></pre>
   </body>
 </html>

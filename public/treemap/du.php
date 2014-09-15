@@ -1,8 +1,8 @@
 <?php
-require_once __DIR__ . '/../include.php';
+require_once __DIR__ . '/../../include.php';
 $limit = isset($_GET['limit']) ? (int) $_GET['limit'] : 4;
 $tree = [
-    'name' => '.',
+    'name' => '{root}',
     'size' => null,
     'children' => [],
 ];
@@ -17,7 +17,7 @@ foreach (eachLine($file) as $line) {
     foreach ($paths as $node) {
         if (!isset($root[$node])) {
             $root[$node] = [
-                'name' => $node,
+                'name' => $line[1],
                 'size' => $line[0],
                 'children' => [],
             ];
@@ -39,4 +39,4 @@ function trimTree(&$tree) {
 }
 trimTree($tree);
 
-echo json_encode($tree, JSON_PRETTY_PRINT);
+echo json_encode($tree['children'][0], JSON_PRETTY_PRINT);
