@@ -26,7 +26,7 @@ function getLatestLog() {
     return $logs[0];
 }
 
-function eachLine($file, $limit) {
+function eachLine($file) {
     $du = file_get_contents($file);
     $fp = fopen($file, 'r');
     while ($line = fgetcsv($fp, 1024, "\t")) {
