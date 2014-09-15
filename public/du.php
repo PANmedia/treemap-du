@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/../include.php';
-$limit = isset($_GET['limit']) ? (int) $_GET['limit'] : 100;
+$limit = isset($_GET['limit']) ? (int) $_GET['limit'] : 4;
 $tree = [
     'name' => '.',
     'size' => null,
@@ -8,20 +8,23 @@ $tree = [
 ];
 $file = getLatestLog();
 
-eachLine($file, $limit, function($size, $path) use(&$tree) {
-    $paths = explode('/', $path);
+foreach (eachLine($file) as $line) {
+    $paths = explode('/', $line[1]);
+    if (count($paths) > $limit) {
+        continue;
+    }
     $root =& $tree['children'];
     foreach ($paths as $node) {
         if (!isset($root[$node])) {
             $root[$node] = [
                 'name' => $node,
-                'size' => $size,
+                'size' => $line[0],
                 'children' => [],
             ];
         }
         $root =& $root[$node]['children'];
     }
-});
+}
 
 function trimTree(&$tree) {
     if (sizeof($tree['children']) == 0) {
